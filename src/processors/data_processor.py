@@ -317,12 +317,30 @@ class DataProcessor:
             
             # Save each dataframe
             for df, filename in args:
+                # Make a copy to avoid modifying the original
+                df_copy = df.copy()
+                
+                # Convert timestamp columns to strings
+                for col in df_copy.columns:
+                    # Handle Timestamp objects
+                    if pd.api.types.is_datetime64_any_dtype(df_copy[col]):
+                        df_copy[col] = df_copy[col].astype(str)
+                    
+                    # Handle date objects
+                    elif 'date' in col.lower() and not pd.api.types.is_numeric_dtype(df_copy[col]):
+                        df_copy[col] = df_copy[col].astype(str)
+                    
+                    # Handle lists and other non-primitive objects
+                    elif df_copy[col].dtype == 'object':
+                        df_copy[col] = df_copy[col].apply(lambda x: 
+                            str(x) if isinstance(x, (list, dict, tuple, set, pd.Timestamp)) else x)
+                
                 # Convert filename to table name (remove .csv and use snake_case)
                 table_name = os.path.splitext(filename)[0]
                 
                 # Save to database, replacing existing table
-                logger.info(f"Saving {len(df)} records to SQLite table {table_name}")
-                df.to_sql(table_name, conn, if_exists='replace', index=False)
+                logger.info(f"Saving {len(df_copy)} records to SQLite table {table_name}")
+                df_copy.to_sql(table_name, conn, if_exists='replace', index=False)
                 
             conn.close()
             logger.info("Successfully saved all data to SQLite database")
