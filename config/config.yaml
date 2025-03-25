@@ -4,10 +4,10 @@ paths:
   output_dir: "data/processed"
   schema_dir: "schemas"
   
-# Database configuration - can be expanded later
+# Database configuration
 database:
-  type: "file"  # Options: file, sqlite, bigquery
-  sqlite_path: "data/ccfc.db"  # Path to SQLite database
+  type: "sqlite"  # Options: sqlite, bigquery
+  db_path: "data/ccfc.db"  # Path to SQLite database
   bigquery:
     dataset_id: "ccfc"  # BigQuery dataset ID
     project_id: "caitfc"  # Google Cloud project ID
@@ -17,10 +17,17 @@ database:
 # Processing configuration
 processing:
   chunk_size: 10000
-  num_workers: null  # null means use max available minus one
+  num_workers: 7
   progress_interval: 5  # Log progress every N chunks
   use_multiprocessing: true  # Set to false for debugging
   
+# Entity matching settings
+entity_matching:
+  threshold: 0.8
+  weights:
+    name: 0.6
+    address: 0.4
+
 # Matching configuration
 matching:
   exact_match_fields:
@@ -81,6 +88,6 @@ sources:
     
   fec_donations:
     type: "donation_history"
-    file_pattern: "fec_donations_*.csv"
+    file_pattern: "*_donations*.csv"
     id_field: "transaction_id"
     adapter: "FECDonationAdapter" 

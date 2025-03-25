@@ -20,21 +20,35 @@ class DatabaseManager:
         """
         self.config = config
         self.db_type = config.get("database.type", "sqlite")
-        self.db_path = config.get("database.sqlite_path", "data/ccfc.db")
+        
+        # Support both db_path and sqlite_path for backward compatibility
+        self.db_path = config.get("database.db_path")
+        if not self.db_path:
+            self.db_path = config.get("database.sqlite_path", "data/ccfc.db")
+        
+        logger.info(f"Initializing database with type {self.db_type} at path {self.db_path}")
         
         if self.db_type == "bigquery":
             try:
                 from google.cloud import bigquery
                 self.client = bigquery.Client()
                 self.dataset_id = config.get("database.bigquery.dataset_id", "ccfc")
+                self.project_id = config.get("database.bigquery.project_id", "caitfc")
+                self.location = config.get("database.bigquery.location", "us")
+                logger.info(f"Connected to BigQuery project: {self.project_id}, dataset: {self.dataset_id}")
             except ImportError:
                 logger.warning("BigQuery dependencies not installed. Falling back to SQLite.")
                 self.db_type = "sqlite"
-        else:
+        
+        if self.db_type == "sqlite":
             # Ensure SQLite database directory exists
             os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
             self.conn = sqlite3.connect(self.db_path)
             self.conn.row_factory = sqlite3.Row
+            logger.info(f"Connected to SQLite database at {self.db_path}")
+        
+        # Create tables if they don't exist
+        self.create_tables()
     
     def create_tables(self):
         """Create the necessary database tables."""
@@ -55,12 +69,18 @@ class DatabaseManager:
                 CREATE TABLE IF NOT EXISTS core_voters (
                     voter_id TEXT PRIMARY KEY,
                     first_name TEXT,
+                    middle_name TEXT,
                     last_name TEXT,
+                    suffix TEXT,
                     dob DATE,
                     gender TEXT,
+                    email TEXT,
+                    phone_number TEXT,
                     current_address_id TEXT,
                     created_at TIMESTAMP,
-                    updated_at TIMESTAMP
+                    updated_at TIMESTAMP,
+                    confidence_score FLOAT,
+                    source_systems TEXT
                 )
             """)
             logger.info("core_voters table created")
@@ -78,6 +98,7 @@ class DatabaseManager:
                     county TEXT,
                     is_current BOOLEAN,
                     created_at TIMESTAMP,
+                    source_system TEXT,
                     FOREIGN KEY (voter_id) REFERENCES core_voters(voter_id)
                 )
             """)
@@ -123,18 +144,135 @@ class DatabaseManager:
             logger.info("Creating donation_history table...")
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS donation_history (
-                    donation_id TEXT PRIMARY KEY,
+                    transaction_id TEXT PRIMARY KEY,
                     voter_id TEXT,
                     committee_id TEXT,
-                    amount DECIMAL(10,2),
-                    donation_date DATE,
+                    report_year INTEGER,
+                    report_type TEXT,
+                    image_number TEXT,
+                    line_number TEXT,
+                    file_number INTEGER,
+                    entity_type TEXT,
+                    entity_type_desc TEXT,
+                    contributor_id TEXT,
+                    contributor_prefix TEXT,
+                    contributor_first_name TEXT,
+                    contributor_middle_name TEXT,
+                    contributor_last_name TEXT,
+                    contributor_suffix TEXT,
+                    contributor_street_1 TEXT,
+                    contributor_street_2 TEXT,
+                    contributor_city TEXT,
+                    contributor_state TEXT,
+                    contributor_zip TEXT,
+                    contributor_employer TEXT,
+                    contributor_occupation TEXT,
+                    receipt_type TEXT,
+                    receipt_type_desc TEXT,
+                    memo_code TEXT,
+                    memo_text TEXT,
+                    contribution_receipt_date DATE,
+                    contribution_receipt_amount DECIMAL(10,2),
+                    contributor_aggregate_ytd DECIMAL(10,2),
+                    candidate_id TEXT,
+                    election_type TEXT,
+                    election_type_full TEXT,
+                    fec_election_type_desc TEXT,
+                    fec_election_year INTEGER,
+                    amendment_indicator TEXT,
+                    amendment_indicator_desc TEXT,
+                    schedule_type TEXT,
+                    schedule_type_full TEXT,
+                    load_date DATE,
+                    original_sub_id TEXT,
+                    back_reference_transaction_id TEXT,
+                    back_reference_schedule_name TEXT,
+                    filing_form TEXT,
+                    sub_id TEXT,
+                    pdf_url TEXT,
+                    line_number_label TEXT,
+                    is_individual BOOLEAN,
+                    increased_limit BOOLEAN,
+                    two_year_transaction_period INTEGER,
                     source_system TEXT,
                     source_record_id TEXT,
                     created_at TIMESTAMP,
+                    updated_at TIMESTAMP,
                     FOREIGN KEY (voter_id) REFERENCES core_voters(voter_id)
                 )
             """)
             logger.info("donation_history table created")
+            
+            # Create committees table
+            logger.info("Creating committees table...")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS committees (
+                    committee_id TEXT PRIMARY KEY,
+                    committee_name TEXT,
+                    committee_type TEXT,
+                    committee_designation TEXT,
+                    committee_org_type TEXT,
+                    committee_street_1 TEXT,
+                    committee_street_2 TEXT,
+                    committee_city TEXT,
+                    committee_state TEXT,
+                    committee_zip TEXT,
+                    committee_treasurer_name TEXT,
+                    committee_email TEXT,
+                    committee_phone TEXT,
+                    committee_website TEXT,
+                    filing_frequency TEXT,
+                    party_affiliation TEXT,
+                    organization_type TEXT,
+                    connected_organization_name TEXT,
+                    candidate_id TEXT,
+                    committee_registration_date DATE,
+                    committee_termination_date DATE,
+                    committee_status TEXT,
+                    is_national_committee BOOLEAN,
+                    has_nonfederal_account BOOLEAN,
+                    last_file_date DATE,
+                    last_report_year INTEGER,
+                    created_at TIMESTAMP,
+                    updated_at TIMESTAMP
+                )
+            """)
+            logger.info("committees table created")
+            
+            # Create candidates table
+            logger.info("Creating candidates table...")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS candidates (
+                    candidate_id TEXT PRIMARY KEY,
+                    candidate_name TEXT,
+                    candidate_first_name TEXT,
+                    candidate_last_name TEXT,
+                    candidate_middle_name TEXT,
+                    candidate_prefix TEXT,
+                    candidate_suffix TEXT,
+                    candidate_street_1 TEXT,
+                    candidate_street_2 TEXT,
+                    candidate_city TEXT,
+                    candidate_state TEXT,
+                    candidate_zip TEXT,
+                    candidate_party_affiliation TEXT,
+                    candidate_office TEXT,
+                    candidate_office_state TEXT,
+                    candidate_office_district TEXT,
+                    candidate_status TEXT,
+                    incumbent_challenger_status TEXT,
+                    principal_campaign_committee_id TEXT,
+                    election_year INTEGER,
+                    load_date DATE,
+                    candidate_inactive_date DATE,
+                    candidate_registration_date DATE,
+                    candidate_last_file_date DATE,
+                    candidate_last_report_year INTEGER,
+                    created_at TIMESTAMP,
+                    updated_at TIMESTAMP
+                )
+            """)
+            logger.info("candidates table created")
             
             # Commit the changes
             self.conn.commit()
@@ -200,13 +338,13 @@ class DatabaseManager:
             df = pd.read_sql(f"SELECT * FROM {table_name}", self.conn)
             
             # Convert string dates back to datetime
-            date_columns = ['created_at', 'updated_at', 'dob', 'registration_date', 'election_date', 'donation_date']
+            date_columns = ['created_at', 'updated_at', 'dob', 'registration_date', 'election_date', 'contribution_receipt_date']
             for col in date_columns:
                 if col in df.columns:
                     df[col] = pd.to_datetime(df[col])
             
             # Convert integer boolean columns back to boolean
-            bool_columns = ['is_current', 'voted']
+            bool_columns = ['is_current', 'voted', 'is_individual', 'increased_limit', 'is_national_committee', 'has_nonfederal_account']
             for col in bool_columns:
                 if col in df.columns:
                     df[col] = df[col].astype(bool)

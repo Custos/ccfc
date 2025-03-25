@@ -174,10 +174,32 @@ class BaseAdapter(ABC):
         if num_workers is None:
             num_workers = max(1, mp.cpu_count() - 1)  # Use all but one core
         
+        # Force single-threaded processing for now until multiprocessing is fixed
+        num_workers = 1
+        
         logger.info(f"Using {num_workers} workers for processing")
         
-        # Read the file in chunks
-        chunks = pd.read_csv(file_path, dtype=str, chunksize=chunk_size)
+        # Read the file in chunks with flexible encoding and line termination
+        try:
+            chunks = pd.read_csv(
+                file_path, 
+                dtype=str, 
+                chunksize=chunk_size,
+                on_bad_lines='warn',
+                encoding='utf-8',
+                engine='python'
+            )
+        except UnicodeDecodeError:
+            # Try with different encoding if UTF-8 fails
+            logger.warning(f"UTF-8 encoding failed, trying with latin-1")
+            chunks = pd.read_csv(
+                file_path, 
+                dtype=str, 
+                chunksize=chunk_size,
+                on_bad_lines='warn',
+                encoding='latin-1',
+                engine='python'
+            )
         
         # Convert to list for progress tracking
         chunk_list = list(chunks)

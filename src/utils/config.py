@@ -4,7 +4,10 @@ import os
 import yaml
 import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union, TypedDict
+
+# Type alias for configuration dictionary
+ConfigType = Dict[str, Any]
 
 logger = logging.getLogger(__name__)
 
