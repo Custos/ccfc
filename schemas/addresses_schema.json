@@ -1,0 +1,17 @@
+[
+  {"name": "address_id", "type": "STRING"},
+  {"name": "street_number", "type": "STRING"},
+  {"name": "street_name", "type": "STRING"},
+  {"name": "apartment", "type": "STRING"},
+  {"name": "city", "type": "STRING"},
+  {"name": "state", "type": "STRING"},
+  {"name": "zip", "type": "STRING"},
+  {"name": "zip_plus_4", "type": "STRING"},
+  {"name": "is_mailing_address", "type": "BOOLEAN"},
+  {"name": "valid_from", "type": "DATE"},
+  {"name": "valid_to", "type": "DATE"},
+  {"name": "source_system", "type": "STRING"},
+  {"name": "source_record_id", "type": "STRING"},
+  {"name": "created_at", "type": "TIMESTAMP"},
+  {"name": "updated_at", "type": "TIMESTAMP"}
+] 

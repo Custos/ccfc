@@ -1,0 +1,28 @@
+# Database configuration
+database:
+  type: "sqlite"  # Options: "sqlite" or "bigquery"
+  sqlite_path: "data/ccfc.db"  # Path to SQLite database file
+  bigquery:
+    dataset_id: "ccfc"  # Only used if type is "bigquery"
+    project_id: "caitfc"  # Google Cloud project ID
+    location: "us"  # BigQuery dataset location (e.g., "us" or "us-east1")
+    service_account_key: "/Users/jofe/code/ccfc/caitfc-key.json"  # Path to your service account key file
+
+# Path configurations
+paths:
+  output_dir: "data/processed"  # Directory for processed output files
+  raw_dir: "data/raw"  # Directory for raw input files
+  schema_dir: "schemas"  # Directory for schema definitions
+
+# Source configurations
+sources:
+  rockland:
+    adapter: "RocklandVoterAdapter"
+    files:
+      - "data/raw/rockland_voters.csv"
+    has_election_history: true
+  putnam:
+    adapter: "PutnamVoterAdapter"
+    files:
+      - "data/raw/putnam_voters.csv" 
+    has_election_history: true 

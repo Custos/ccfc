@@ -1,0 +1,86 @@
+# Paths configuration
+paths:
+  input_dir: "data/raw"
+  output_dir: "data/processed"
+  schema_dir: "schemas"
+  
+# Database configuration - can be expanded later
+database:
+  type: "file"  # Options: file, sqlite, bigquery
+  sqlite_path: "data/ccfc.db"  # Path to SQLite database
+  bigquery:
+    dataset_id: "ccfc"  # BigQuery dataset ID
+    project_id: "caitfc"  # Google Cloud project ID
+    location: "us"  # BigQuery dataset location
+    service_account_key: "/Users/jofe/code/ccfc/caitfc-key.json"  # Path to service account key
+  
+# Processing configuration
+processing:
+  chunk_size: 10000
+  num_workers: null  # null means use max available minus one
+  progress_interval: 5  # Log progress every N chunks
+  use_multiprocessing: true  # Set to false for debugging
+  
+# Matching configuration
+matching:
+  exact_match_fields:
+    - ["first_name", "last_name", "dob"]
+    - ["voter_id"]
+    - ["phone_number"]
+  probabilistic_match_fields:
+    - name: "first_name"
+      weight: 0.25
+      method: "levenshtein"
+      threshold: 0.85
+    - name: "last_name"
+      weight: 0.25
+      method: "levenshtein"
+      threshold: 0.85
+    - name: "dob"
+      weight: 0.2
+      method: "exact"
+    - name: "phone_number"
+      weight: 0.4
+      method: "exact"
+    - name: "street_number"
+      weight: 0.05
+      method: "exact"
+    - name: "zip"
+      weight: 0.05
+      method: "exact"
+  match_threshold: 0.8
+  high_confidence_threshold: 0.95
+  
+# Source specific configurations
+sources:
+  rockland:
+    type: "voter_registration"
+    file_pattern: "rockland_*.csv"
+    id_field: "Voter Id"
+    adapter: "RocklandVoterAdapter"
+    has_election_history: true
+  
+  putnam:
+    type: "voter_registration"
+    file_pattern: "putnam_*.csv"
+    id_field: "Voter Id"
+    adapter: "PutnamVoterAdapter"
+    has_election_history: true
+    
+  fec_candidates:
+    type: "candidate"
+    file_pattern: "fec_candidates_*.csv"
+    id_field: "candidate_id"
+    adapter: "FECCandidateAdapter"
+    
+  fec_committees:
+    type: "committee"
+    file_pattern: "fec_committees_*.csv"
+    id_field: "committee_id"
+    adapter: "FECCommitteeAdapter"
+    
+  fec_donations:
+    type: "donation_history"
+    file_pattern: "fec_donations_*.csv"
+    id_field: "transaction_id"
+    adapter: "FECDonationAdapter" 

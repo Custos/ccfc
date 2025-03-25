@@ -1,0 +1,17 @@
+[
+  {"name": "registration_id", "type": "STRING"},
+  {"name": "voter_id", "type": "STRING"},
+  {"name": "county", "type": "STRING"},
+  {"name": "registration_date", "type": "DATE"},
+  {"name": "registration_source", "type": "STRING"},
+  {"name": "party", "type": "STRING"},
+  {"name": "voter_status", "type": "STRING"},
+  {"name": "voter_status_reason", "type": "STRING"},
+  {"name": "polling_place_name", "type": "STRING"},
+  {"name": "polling_place_address", "type": "STRING"},
+  {"name": "address_id", "type": "STRING"},
+  {"name": "source_system", "type": "STRING"},
+  {"name": "source_record_id", "type": "STRING"},
+  {"name": "created_at", "type": "TIMESTAMP"},
+  {"name": "updated_at", "type": "TIMESTAMP"}
+] 

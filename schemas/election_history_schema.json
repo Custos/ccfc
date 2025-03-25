@@ -1,0 +1,15 @@
+[
+  {"name": "election_record_id", "type": "STRING"},
+  {"name": "voter_id", "type": "STRING"},
+  {"name": "county", "type": "STRING"},
+  {"name": "election_code", "type": "STRING"},
+  {"name": "election_type", "type": "STRING"},
+  {"name": "election_year", "type": "INTEGER"},
+  {"name": "voting_method", "type": "STRING"},
+  {"name": "party", "type": "STRING"},
+  {"name": "absentee_type", "type": "STRING"},
+  {"name": "source_system", "type": "STRING"},
+  {"name": "source_record_id", "type": "STRING"},
+  {"name": "created_at", "type": "TIMESTAMP"},
+  {"name": "updated_at", "type": "TIMESTAMP"}
+]

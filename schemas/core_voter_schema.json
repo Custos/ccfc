@@ -1,0 +1,17 @@
+[
+  {"name": "voter_id", "type": "STRING"},
+  {"name": "first_name", "type": "STRING"},
+  {"name": "middle_name", "type": "STRING"},
+  {"name": "last_name", "type": "STRING"},
+  {"name": "suffix", "type": "STRING"},
+  {"name": "dob", "type": "DATE"},
+  {"name": "gender", "type": "STRING"},
+  {"name": "email", "type": "STRING"},
+  {"name": "phone_number", "type": "STRING"},
+  {"name": "current_address_id", "type": "STRING"},
+  {"name": "created_at", "type": "TIMESTAMP"},
+  {"name": "updated_at", "type": "TIMESTAMP"},
+  {"name": "confidence_score", "type": "FLOAT"},
+  {"name": "source_systems", "type": "STRING", "mode": "REPEATED"},
+  {"name": "alternate_ids", "type": "STRING", "mode": "REPEATED"}
+] 

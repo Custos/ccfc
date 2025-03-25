@@ -1,0 +1,2 @@
+        logger.info(f"Extracted {len(history)} election history records")
+        return pd.DataFrame(history) if history else pd.DataFrame()

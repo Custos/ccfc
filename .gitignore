@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+data/raw/*.csv
+data/processed/*.csv
+data/ccfc.db
+caitfc-key.json
